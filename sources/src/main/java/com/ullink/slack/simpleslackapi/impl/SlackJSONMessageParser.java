@@ -3,9 +3,11 @@ package com.ullink.slack.simpleslackapi.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.ullink.slack.simpleslackapi.events.*;
 import com.ullink.slack.simpleslackapi.SlackChannel;
 import com.ullink.slack.simpleslackapi.SlackFile;
@@ -366,14 +368,11 @@ class SlackJSONMessageParser
         return reacs;
     }
 
-    public static Map<String, String> extractEmojisFromMessageJSON(JSONObject object) {
+    public static Map<String, String> extractEmojisFromMessageJSON(JsonObject emojiObject) {
         Map<String, String> emojis = new HashMap<>();
-
-        for (Object o : object.entrySet()) {
-            Map.Entry entry = (Map.Entry) o;
-            emojis.put(entry.getKey().toString(), entry.getValue().toString());
+        for (Map.Entry<String,JsonElement> entry : emojiObject.entrySet()) {
+            emojis.put(entry.getKey().toString(), entry.getValue().getAsString());
         }
-
         return emojis;
     }
 }

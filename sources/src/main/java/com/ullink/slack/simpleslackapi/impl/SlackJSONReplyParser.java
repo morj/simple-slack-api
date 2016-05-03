@@ -31,8 +31,8 @@ class SlackJSONReplyParser
         }
 
         if (isEmojiReply(obj)) {
-            String timestamp = (String) obj.get("cache_ts");
-            return new SlackEmojiReplyImpl(ok, error, SlackJSONMessageParser.extractEmojisFromMessageJSON((JSONObject) obj.get("emoji")), timestamp);
+            String timestamp = GsonHelper.getStringOrNull(obj.get("cache_ts"));
+            return new SlackEmojiReplyImpl(ok, error, SlackJSONMessageParser.extractEmojisFromMessageJSON(obj.get("emoji").getAsJsonObject()), timestamp);
         }
 
         if (ok == null) {
@@ -90,9 +90,9 @@ class SlackJSONReplyParser
         return group != null && group.isJsonObject();
     }
 
-    private static boolean isEmojiReply(JSONObject obj) {
-        Object emoji = obj.get("emoji");
-        return emoji != null && emoji instanceof JSONObject;
+    private static boolean isEmojiReply(JsonObject obj) {
+        JsonElement emoji = obj.get("emoji");
+        return emoji != null && emoji.isJsonObject();
     }
 
 }
