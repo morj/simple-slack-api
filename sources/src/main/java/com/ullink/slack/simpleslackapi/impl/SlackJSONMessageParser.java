@@ -92,16 +92,18 @@ class SlackJSONMessageParser {
 
     private static SlackChannelJoined extractChannelJoinedEvent(SlackSession slackSession, JSONObject obj)
     {
-        JSONObject channelJSONObject = (JSONObject) obj.get("channel");
-        SlackChannel slackChannel = parseChannelDescription(channelJSONObject);
-        return new SlackChannelJoinedImpl(slackChannel);
+        String channelId = (String) obj.get("channel");
+        String userId = (String) obj.get("user");
+        SlackChannel slackChannel = slackSession.findChannelById(channelId);
+        return new SlackChannelJoinedImpl(slackChannel, slackSession.findUserById(userId));
     }
 
     private static SlackChannelLeft extractChannelLeftEvent(SlackSession slackSession, JSONObject obj)
     {
         String channelId = (String) obj.get("channel");
+        String userId = (String) obj.get("user");
         SlackChannel slackChannel = slackSession.findChannelById(channelId);
-        return new SlackChannelLeftImpl(slackChannel);
+        return new SlackChannelLeftImpl(slackChannel, slackSession.findUserById(userId));
     }
 
     private static SlackGroupJoined extractGroupJoinedEvent(SlackSession slackSession, JSONObject obj)
