@@ -156,6 +156,10 @@ class SlackJSONMessageParser {
         SlackMessageSubType subType = SlackMessageSubType.getByCode((String) obj.get("subtype"));
         switch (subType)
         {
+            case CHANNEL_JOIN:
+                return extractChannelJoinedEvent(slackSession, obj);
+            case CHANNEL_LEAVE:
+                return extractChannelLeftEvent(slackSession, obj);
             case MESSAGE_CHANGED:
                 return parseMessageUpdated(obj, channel, ts);
             case MESSAGE_DELETED:
@@ -218,7 +222,7 @@ class SlackJSONMessageParser {
     }
 
     private final static String COMMENT_PLACEHOLDER = "> and commented:";
-    
+
 
      private static void parseSlackFileFromRaw(JSONObject rawFile, SlackFile file) {
         file.setId((String) rawFile.get("id"));
@@ -246,7 +250,7 @@ class SlackJSONMessageParser {
         file.setPermalink((String) rawFile.get("permalink"));
         file.setPermalinkPublic((String) rawFile.get("permalink_public"));
     }
-  
+
     private static SlackMessagePostedImpl parseMessagePublishedWithFile(JSONObject obj, SlackChannel channel, String ts, SlackSession slackSession)
     {
         SlackFile file = new SlackFile();
@@ -254,23 +258,23 @@ class SlackJSONMessageParser {
             JSONObject rawFile = (JSONObject) obj.get("file");
 	        parseSlackFileFromRaw(rawFile, file);
         }
-        
+
         String text = (String) obj.get("text");
         String subtype = (String) obj.get("subtype");
 
         String comment = null;
-        
+
         int idx = text.indexOf(COMMENT_PLACEHOLDER);
-        
+
         if (idx != -1) {
             comment = text.substring(idx + COMMENT_PLACEHOLDER.length());
         }
         file.setComment(comment);
-        
+
         String userId = (String) obj.get("user");
-        
+
         SlackUser user = slackSession.findUserById(userId);
-        
+
         return new SlackMessagePostedImpl(text, user, user, channel, ts,file,obj, SlackMessagePosted.MessageSubType.fromCode(subtype));
     }
 
@@ -286,7 +290,7 @@ class SlackJSONMessageParser {
     private static ReactionAdded extractReactionAddedEvent(SlackSession slackSession, JSONObject obj) {
         JSONObject item = (JSONObject) obj.get("item");
         String emojiName = (String) obj.get("reaction");
-        String messageId = (String) item.get("ts");	
+        String messageId = (String) item.get("ts");
         String fileId = (String) item.get("file");
         String fileCommentId = (String) item.get("file_comment");
         String channelId = (String) item.get("channel");
@@ -316,7 +320,7 @@ class SlackJSONMessageParser {
     private static ReactionRemoved extractReactionRemovedEvent(SlackSession slackSession, JSONObject obj) {
         JSONObject item = (JSONObject) obj.get("item");
         String emojiName = (String) obj.get("reaction");
-        String messageId = (String) item.get("ts");	
+        String messageId = (String) item.get("ts");
         String fileId = (String) item.get("file");
         String fileCommentId = (String) item.get("file_comment");
         String channelId = (String) item.get("channel");
